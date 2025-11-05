@@ -3,7 +3,9 @@
 **Professional presentation platform with AI-powered competitive analysis, token-based access control, and comprehensive analytics.**
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=next.js&logoColor=white)](https://nextjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![React](https://img.shields.io/badge/React-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev/)
+[![Netlify](https://img.shields.io/badge/Netlify-00C7B7?style=flat&logo=netlify&logoColor=white)](https://www.netlify.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat&logo=supabase&logoColor=white)](https://supabase.com/)
 [![Anthropic](https://img.shields.io/badge/Anthropic-000000?style=flat&logo=anthropic&logoColor=white)](https://www.anthropic.com/)
 
@@ -11,18 +13,22 @@
 
 ## Overview
 
-AI Presenter is a modern, fully-featured presentation platform built for agencies and consultants who need to create secure, trackable pitch decks and client presentations. Originally built on Base44, it has been completely rewritten as a standalone TypeScript application with advanced features and no external dependencies.
+AI Presenter is a modern, fully-featured presentation platform built for agencies and consultants who need to create secure, trackable pitch decks and client presentations. Originally built on Base44, it has been completely rewritten as a standalone TypeScript application with Netlify Serverless Functions for enhanced security and scalability.
+
+**Netlify Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
 
 ### Key Features
 
 - **Token-Based Access Control** - Secure, shareable links with expiration, view limits, and password protection
 - **AI-Powered Analysis** - Generate competitive analysis and market insights using Claude 3.5
+- **Multi-AI Business Intelligence** - Orchestrate Claude, Grok 4, Twitter, Reddit, and web search for comprehensive insights
+- **Netlify Serverless Functions** - Secure API proxy layer keeps all credentials server-side
 - **Comprehensive Analytics** - Track views, engagement, and user behavior with detailed reports
 - **File Management** - Organized client file storage with Supabase Storage
 - **Type-Safe Architecture** - Full TypeScript implementation with comprehensive type definitions
 - **Performance Optimized** - Built-in caching, lazy loading, and prefetching
 - **Error Resilient** - React Error Boundaries and comprehensive error handling
-- **Production Ready** - Configured for Netlify deployment with environment templates
+- **Production Ready** - Configured for Netlify deployment with automated functions
 
 ---
 
@@ -55,28 +61,33 @@ npm run dev
 
 ## Documentation
 
+- **[CLAUDE.md](./CLAUDE.md)** - Complete guide for Claude Code AI assistant
+- **[NETLIFY_FUNCTIONS.md](./NETLIFY_FUNCTIONS.md)** - Comprehensive Netlify Functions documentation
 - **[Quick Start Guide](./docs/QUICK_START.md)** - Get up and running in 15 minutes
 - **[Migration Complete Guide](./docs/AI_PRESENTER_MIGRATION_COMPLETE.md)** - Comprehensive migration documentation
 - **[API Reference](./docs/AI_PRESENTER_MIGRATION_COMPLETE.md#api-reference)** - Complete SDK documentation
-- **[Deployment Guide](./docs/AI_PRESENTER_MIGRATION_COMPLETE.md#deployment-guide)** - Production deployment steps
+- **[.env.example](./.env.example)** - Environment variables reference with security guidelines
 
 ---
 
 ## Tech Stack
 
 ### Core Technologies
-- **Frontend:** Vite, React 18+, TypeScript
-- **Database:** Supabase (PostgreSQL)
+- **Frontend:** Vite + React 18 + TypeScript
+- **Database:** Supabase (PostgreSQL with RLS)
 - **Storage:** Supabase Storage
-- **AI:** Anthropic Claude 3.5 Sonnet
-- **Deployment:** Netlify
-- **Styling:** Tailwind CSS
+- **AI:** Anthropic Claude 3.5 Sonnet (via Netlify Functions)
+- **Serverless:** Netlify Functions (9 active functions)
+- **Deployment:** Netlify (Project ID: a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d)
+- **Styling:** Tailwind CSS + shadcn/ui
 
 ### Key Libraries
 - `@supabase/supabase-js` - Database and authentication
-- `@anthropic-ai/sdk` - AI-powered features
+- `@anthropic-ai/sdk` - AI features (server-side only in Netlify Functions)
+- `@tanstack/react-query` - Data fetching and caching
+- React Router v7 - Client-side routing
 - React Error Boundaries - Error handling
-- Custom hooks for data fetching
+- Custom SDK wrapper for type-safe operations
 
 ---
 
@@ -181,24 +192,33 @@ console.log(analysis.unique_value_proposition);
 
 ## Environment Variables
 
-Required configuration:
+**CRITICAL:** Environment variables use different prefixes based on where they're accessed:
+- **`VITE_` prefix:** Client-side (browser-accessible, bundled into JavaScript)
+- **No prefix:** Server-side only (Netlify Functions, secure)
+
+**⚠️ NEVER use `VITE_` prefix for API keys - they will be publicly exposed!**
+
+### Required Configuration
 
 ```bash
-# Supabase (Required)
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+# CLIENT-SIDE (Browser) - Safe to expose
+VITE_SUPABASE_URL=https://xxx.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_APP_URL=http://localhost:5173
+
+# SERVER-SIDE (Netlify Functions) - NEVER expose to browser
 SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# Anthropic AI (Required for AI features)
 ANTHROPIC_API_KEY=your-anthropic-key
-
-# Application
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NODE_ENV=development
-NEXT_PUBLIC_ANALYTICS_ENABLED=true
+SERPAPI_KEY=your-serpapi-key
+FIRECRAWL_API_KEY=your-firecrawl-key
+XAI_API_KEY=your-grok-key
+TWITTER_BEARER_TOKEN=your-twitter-token
+REDDIT_CLIENT_ID=your-reddit-id
+REDDIT_CLIENT_SECRET=your-reddit-secret
 ```
 
 **Full configuration:** See [.env.example](./.env.example)
+**Netlify Functions Guide:** See [NETLIFY_FUNCTIONS.md](./NETLIFY_FUNCTIONS.md)
 
 ---
 
@@ -206,18 +226,37 @@ NEXT_PUBLIC_ANALYTICS_ENABLED=true
 
 ### Netlify Deployment
 
+**Project Information:**
+- **Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
+- **Dashboard:** https://app.netlify.com/sites/[your-site-name]/overview
+- **Configuration:** `netlify.toml` (already configured)
+
+**Step-by-Step Deployment:**
+
 ```bash
-# 1. Configure Netlify
-# netlify.toml is already configured
+# 1. Install Netlify CLI
+npm install -g netlify-cli
 
-# 2. Set environment variables in Netlify Dashboard
-# Settings → Environment Variables → Add all from .env.example
+# 2. Login to Netlify
+netlify login
 
-# 3. Deploy
+# 3. Link to existing site
+netlify link --id a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d
+
+# 4. Set environment variables in Netlify Dashboard
+# Go to: Site Settings → Environment Variables
+# Add ALL variables from .env.example (both VITE_ and non-VITE_)
+
+# 5. Deploy to production
 netlify deploy --prod
 
 # Or connect GitHub repository for automatic deployments
 ```
+
+**What Gets Deployed:**
+- Frontend: `dist/` directory (Vite build output)
+- Functions: `netlify/functions/` directory (9 serverless functions)
+- Configuration: `netlify.toml` (SPA redirects, headers, build settings)
 
 ### Database Setup
 
@@ -260,10 +299,19 @@ npx ts-node scripts/migrate-from-base44.ts
 ### Available Scripts
 
 ```bash
-npm run dev          # Start development server (Vite)
+# Development
+npm run dev          # Start Vite dev server (port 5173)
+netlify dev          # Start with Netlify Functions (port 8888)
+
+# Production
 npm run build        # Build for production
 npm run preview      # Preview production build
 npm run lint         # Run linting
+
+# Deployment
+netlify deploy --prod           # Deploy to production
+netlify functions:list          # List all functions
+netlify functions:invoke health # Test function
 ```
 
 ### Development Workflow

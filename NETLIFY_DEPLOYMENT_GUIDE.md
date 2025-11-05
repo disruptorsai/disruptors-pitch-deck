@@ -1,13 +1,20 @@
 # Netlify Deployment Guide
 
-**Quick setup guide for deploying the Disruptors AI Pitch Deck to Netlify**
+**Quick setup guide for deploying the AI Presenter to Netlify**
+
+## Project Information
+
+**Netlify Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
+**Dashboard:** https://app.netlify.com/sites/[your-site-name]/overview
+**Functions:** 9 active serverless functions
 
 ## Prerequisites
 
-- Netlify account
+- Netlify account (linked to project ID above)
 - Supabase project with database configured
 - Anthropic API key (for AI features)
 - GitHub repository connected to Netlify
+- Netlify CLI installed (`npm install -g netlify-cli`)
 
 ---
 
@@ -32,19 +39,26 @@ ANTHROPIC_API_KEY=sk-ant-api03-...
 ### Optional Variables (for enhanced features)
 
 ```bash
-# Voice AI (DisruptorBot)
+# Voice AI (DisruptorBot) - Client-side if needed
 VITE_ELEVENLABS_API_KEY=your-elevenlabs-key
 VITE_ELEVENLABS_AGENT_ID=your-agent-id
 
-# Business Intelligence APIs (server-side only)
+# Business Intelligence APIs (ALL server-side only, NO VITE_ prefix)
 SERPAPI_KEY=your-serpapi-key
 FIRECRAWL_API_KEY=your-firecrawl-key
 BRAVE_API_KEY=your-brave-key
+XAI_API_KEY=your-grok-api-key
+TWITTER_BEARER_TOKEN=your-twitter-token
+REDDIT_CLIENT_ID=your-reddit-id
+REDDIT_CLIENT_SECRET=your-reddit-secret
+REDDIT_USER_AGENT=AI-Presenter-Business-Analyzer/1.0
 ```
 
-**CRITICAL NOTES:**
-- `SUPABASE_SERVICE_ROLE_KEY` has NO `VITE_` prefix (server-side only)
-- `ANTHROPIC_API_KEY` has NO `VITE_` prefix (server-side only)
+**⚠️ CRITICAL SECURITY NOTES:**
+- Variables with `VITE_` prefix are PUBLIC and bundled into client JavaScript
+- Variables WITHOUT `VITE_` prefix are PRIVATE and only accessible in Netlify Functions
+- **NEVER use `VITE_` prefix for API keys or secrets** - they will be exposed to anyone
+- Server-side variables: `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`, all BI APIs
 - Never commit these values to Git
 
 ---
@@ -93,39 +107,76 @@ Visit: `https://your-site.netlify.app/.netlify/functions/health`
 Expected response:
 ```json
 {
-  "status": "healthy",
-  "timestamp": "2025-10-20T...",
-  "configuration": {
-    "hasSupabaseUrl": true,
-    "hasSupabaseAnonKey": true,
-    "hasServiceRoleKey": true,
-    "hasAnthropicKey": true
-  }
+  "status": "ok",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+  "functions": [
+    "health",
+    "ai-service",
+    "business-analyzer",
+    "grok-service",
+    "twitter-service",
+    "reddit-service",
+    "client-management",
+    "presentation-personalizer",
+    "business-intelligence"
+  ],
+  "environment": "production"
 }
 ```
 
-If status is "unhealthy", check which variables are missing.
+If health check fails, check Netlify Function logs for errors.
 
-### 4.2 Test Public Pages
+### 4.2 Test AI Service Function
+
+```bash
+curl -X POST https://your-site.netlify.app/.netlify/functions/ai-service \
+  -H "Content-Type: application/json" \
+  -d '{"action":"health"}'
+```
+
+Expected response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2025-01-15T12:00:00.000Z",
+  "hasApiKey": true,
+  "availableActions": [
+    "generateCompetitiveAnalysis",
+    "generatePitchContent",
+    "enhanceContent",
+    "generateMetaDescription",
+    "health"
+  ]
+}
+```
+
+### 4.3 Test Public Pages
 
 - [ ] Homepage loads: `https://your-site.netlify.app/`
 - [ ] Presentation viewer works: `https://your-site.netlify.app/p/disruptors-media-demo`
 - [ ] All 9 slides display correctly
 - [ ] Navigation between slides works
 
-### 4.3 Test Admin Pages
+### 4.4 Test Admin Pages
 
 - [ ] Admin dashboard: `https://your-site.netlify.app/admin`
 - [ ] Clients list loads: `https://your-site.netlify.app/admin/clients`
 - [ ] Client creation form: `https://your-site.netlify.app/admin/clients/new`
 
-### 4.4 Check Function Logs
+### 4.5 Check Function Logs
 
-Navigate to: **Netlify Dashboard > Functions > client-management > Logs**
+Navigate to: **Netlify Dashboard > Functions**
+
+Check each function for errors:
+- `ai-service` - Claude API calls working
+- `business-analyzer` - Multi-AI orchestration working
+- `client-management` - Supabase operations working
+- Other functions as needed
 
 Look for:
-- No "Missing Supabase configuration" errors
-- Successful client operations
+- No "Missing environment variable" errors
+- No "API key invalid" errors
+- Successful operations in logs
 - No 500 errors
 
 ---
@@ -284,29 +335,62 @@ Alert if status changes to "unhealthy".
 
 ## Support Resources
 
-- **Netlify Documentation**: https://docs.netlify.com
+- **Netlify Functions Guide**: See `NETLIFY_FUNCTIONS.md` for comprehensive functions documentation
+- **Development Guide**: See `CLAUDE.md` for complete architecture and development guide
+- **Environment Variables**: See `.env.example` for all available variables with security guidelines
+- **Project README**: See `README.md` for overview and quick start
+- **Netlify Documentation**: https://docs.netlify.com/functions/overview/
 - **Supabase Documentation**: https://supabase.com/docs
-- **Deployment Validation Report**: See `DEPLOYMENT_VALIDATION_REPORT.md`
-- **Project README**: See `README.md`
-- **Claude.md**: See `CLAUDE.md` for development guide
+- **Project Dashboard**: https://app.netlify.com/sites/[your-site-name]/overview
 
 ---
 
 ## Quick Reference: Environment Variable Table
 
-| Variable | Prefix | Used By | Security Level |
-|----------|--------|---------|----------------|
-| `VITE_SUPABASE_URL` | VITE_ | Client | Public |
-| `VITE_SUPABASE_ANON_KEY` | VITE_ | Client | Public (with RLS) |
-| `SUPABASE_SERVICE_ROLE_KEY` | None | Functions | SECRET |
-| `ANTHROPIC_API_KEY` | None | Functions | SECRET |
-| `VITE_ELEVENLABS_API_KEY` | VITE_ | Client | Public (rate-limited) |
-| `VITE_ELEVENLABS_AGENT_ID` | VITE_ | Client | Public |
-| `SERPAPI_KEY` | None | Functions | SECRET |
-| `FIRECRAWL_API_KEY` | None | Functions | SECRET |
-| `BRAVE_API_KEY` | None | Functions | SECRET |
+| Variable | Prefix | Used By | Security Level | Function |
+|----------|--------|---------|----------------|----------|
+| `VITE_SUPABASE_URL` | VITE_ | Client | Public | Database connection |
+| `VITE_SUPABASE_ANON_KEY` | VITE_ | Client | Public (with RLS) | Read operations |
+| `SUPABASE_SERVICE_ROLE_KEY` | None | Functions | **SECRET** | Admin operations |
+| `ANTHROPIC_API_KEY` | None | Functions | **SECRET** | ai-service.js, business-analyzer.js |
+| `SERPAPI_KEY` | None | Functions | **SECRET** | business-analyzer.js |
+| `FIRECRAWL_API_KEY` | None | Functions | **SECRET** | business-analyzer.js |
+| `BRAVE_API_KEY` | None | Functions | **SECRET** | business-analyzer.js (fallback) |
+| `XAI_API_KEY` | None | Functions | **SECRET** | grok-service.js, business-analyzer.js |
+| `TWITTER_BEARER_TOKEN` | None | Functions | **SECRET** | twitter-service.js, business-analyzer.js |
+| `REDDIT_CLIENT_ID` | None | Functions | **SECRET** | reddit-service.js, business-analyzer.js |
+| `REDDIT_CLIENT_SECRET` | None | Functions | **SECRET** | reddit-service.js, business-analyzer.js |
+| `VITE_ELEVENLABS_API_KEY` | VITE_ | Client | Public | Voice AI (consider moving to function) |
+| `VITE_ELEVENLABS_AGENT_ID` | VITE_ | Client | Public | Voice AI agent |
+
+**Security Rule:** Variables WITHOUT `VITE_` prefix are NEVER exposed to browser - only Netlify Functions can access them.
 
 ---
 
-**Last Updated**: 2025-10-20
-**Version**: 1.0
+## Netlify CLI Quick Commands
+
+```bash
+# Link to project
+netlify link --id a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d
+
+# Test locally with functions
+netlify dev
+
+# List all functions
+netlify functions:list
+
+# Test specific function
+netlify functions:invoke health
+
+# Deploy to production
+netlify deploy --prod
+
+# View function logs
+netlify logs:function ai-service
+```
+
+---
+
+**Last Updated**: 2025-01-15
+**Version**: 2.0 (Updated for Netlify Functions architecture)
+**Netlify Project ID**: a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d
