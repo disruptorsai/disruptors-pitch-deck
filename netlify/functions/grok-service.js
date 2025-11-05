@@ -14,8 +14,9 @@ const GROK_MODEL = 'grok-4';
 function getGrokClient() {
   const apiKey = process.env.XAI_API_KEY;
 
-  if (!apiKey) {
-    throw new Error('XAI_API_KEY not configured');
+  if (!apiKey || apiKey === 'your-xai-grok-api-key-here') {
+    console.warn('[Grok Service] XAI_API_KEY not configured - Grok features will be unavailable');
+    return null;
   }
 
   return apiKey;
@@ -26,6 +27,35 @@ function getGrokClient() {
  */
 export async function searchBusinessWithGrok(businessName, websiteUrl) {
   const apiKey = getGrokClient();
+
+  // Return fallback if API key not configured
+  if (!apiKey) {
+    console.warn('[Grok Service] Skipping Grok search - XAI_API_KEY not configured');
+    return {
+      recentNews: [],
+      socialSentiment: {
+        overall: 'unknown',
+        twitterMentions: 0,
+        keyTopics: [],
+        sentimentScore: 50
+      },
+      recentDevelopments: [],
+      marketTrends: {
+        trending: false,
+        trendDirection: 'unknown',
+        keyInsights: []
+      },
+      customerFeedback: {
+        averageRating: 0,
+        commonPraise: [],
+        commonComplaints: [],
+        recentReviews: []
+      },
+      competitorMentions: [],
+      lastUpdated: new Date().toISOString(),
+      error: 'XAI_API_KEY not configured'
+    };
+  }
 
   console.log('[Grok Service] Searching for real-time data:', businessName);
 
@@ -166,6 +196,24 @@ Return a comprehensive real-time analysis in JSON format:
  */
 export async function getMarketInsightsWithGrok(industry, businessName) {
   const apiKey = getGrokClient();
+
+  // Return fallback if API key not configured
+  if (!apiKey) {
+    console.warn('[Grok Service] Skipping market insights - XAI_API_KEY not configured');
+    return {
+      industryOverview: 'Market insights unavailable - XAI_API_KEY not configured',
+      currentTrends: [],
+      recentNews: [],
+      keyPlayers: [],
+      opportunities: [],
+      threats: [],
+      investmentTrends: 'Unknown',
+      regulatoryChanges: null,
+      emergingTechnologies: [],
+      lastUpdated: new Date().toISOString(),
+      error: 'XAI_API_KEY not configured'
+    };
+  }
 
   console.log('[Grok Service] Getting market insights for:', industry);
 

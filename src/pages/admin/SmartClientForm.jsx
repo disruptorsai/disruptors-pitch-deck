@@ -25,6 +25,27 @@ import {
 } from '@/components/ui/alert';
 import { TerminalLoader } from '@/components/ui/terminal-loader';
 
+/**
+ * Data Source Badge Component
+ * Shows whether a data source was active during analysis
+ */
+function DataSourceBadge({ name, active, quality }) {
+  return (
+    <div
+      className={`px-3 py-1.5 rounded-full text-xs font-medium flex items-center gap-1.5 ${
+        active
+          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+          : 'bg-red-500/10 text-red-400 border border-red-500/20'
+      }`}
+      title={active ? `Active - ${quality || 'Data collected'}` : `Inactive - API key not configured`}
+    >
+      <span className={`w-2 h-2 rounded-full ${active ? 'bg-green-400' : 'bg-red-400'}`} />
+      {name}
+      {active && quality > 0 && <span className="text-white/50 ml-1">({quality})</span>}
+    </div>
+  );
+}
+
 export default function SmartClientForm() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -341,6 +362,21 @@ export default function SmartClientForm() {
               </p>
             </div>
 
+            {/* API Configuration Notice */}
+            <Alert className="bg-blue-500/10 border-blue-500/20">
+              <AlertCircle className="h-4 w-4 text-blue-500" />
+              <AlertTitle className="text-blue-500">Data Sources Configuration</AlertTitle>
+              <AlertDescription className="text-blue-500/80 text-sm">
+                For <strong>maximum analysis quality</strong>, configure these API keys in your <code className="bg-black/30 px-1.5 py-0.5 rounded">.env.local</code> file:
+                <ul className="list-disc list-inside mt-2 space-y-1 text-xs">
+                  <li><strong>XAI_API_KEY</strong> - Grok 4 real-time intelligence ($5/M tokens, <a href="https://x.ai/api" target="_blank" className="underline">x.ai/api</a>)</li>
+                  <li><strong>TWITTER_BEARER_TOKEN</strong> - Social sentiment analysis ($100/mo, <a href="https://developer.twitter.com" target="_blank" className="underline">developer.twitter.com</a>)</li>
+                  <li><strong>REDDIT_CLIENT_ID/SECRET</strong> - Community insights (Free, <a href="https://www.reddit.com/prefs/apps" target="_blank" className="underline">reddit.com/prefs/apps</a>)</li>
+                </ul>
+                <p className="mt-2 text-xs">✅ <strong>Already active:</strong> Website scraping (Firecrawl), Web search (SerpAPI), Contact extraction</p>
+              </AlertDescription>
+            </Alert>
+
             <div>
               <Label htmlFor="businessName" className="text-white/80 text-lg">
                 Business Name *
@@ -477,10 +513,43 @@ export default function SmartClientForm() {
             {/* Comprehensive Business Intelligence Report */}
             {analyzedData && (
               <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-6">
-                <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-[#FFD700]" />
-                  Comprehensive Business Intelligence Report
-                </h3>
+                <div>
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5 text-[#FFD700]" />
+                    Comprehensive Business Intelligence Report
+                  </h3>
+
+                  {/* Data Source Status Indicators */}
+                  {analyzedData._metadata?.dataSources && (
+                    <div className="flex flex-wrap gap-2 mt-3 p-3 bg-black/20 rounded-lg">
+                      <span className="text-xs text-white/50 mr-2">Data Sources:</span>
+                      <DataSourceBadge
+                        name="Website Analysis"
+                        active={analyzedData._metadata.dataSources.website}
+                        quality={analyzedData._metadata.dataQuality.websiteChars}
+                      />
+                      <DataSourceBadge
+                        name="Grok Real-Time"
+                        active={analyzedData._metadata.dataSources.grok}
+                        quality={analyzedData._metadata.dataQuality.grokNewsItems}
+                      />
+                      <DataSourceBadge
+                        name="Twitter/X"
+                        active={analyzedData._metadata.dataSources.twitter}
+                        quality={analyzedData._metadata.dataQuality.tweetsAnalyzed}
+                      />
+                      <DataSourceBadge
+                        name="Reddit"
+                        active={analyzedData._metadata.dataSources.reddit}
+                        quality={analyzedData._metadata.dataQuality.redditPostsAnalyzed}
+                      />
+                      <DataSourceBadge
+                        name="Contact Extraction"
+                        active={analyzedData._metadata.dataSources.contactExtraction}
+                      />
+                    </div>
+                  )}
+                </div>
 
                 {/* Full Description */}
                 {analyzedData.fullDescription && (

@@ -13,8 +13,8 @@ const TWITTER_API_BASE = 'https://api.twitter.com/2';
 function getTwitterAuth() {
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
 
-  if (!bearerToken) {
-    console.warn('[Twitter Service] No bearer token configured');
+  if (!bearerToken || bearerToken === 'your-twitter-bearer-token-here') {
+    console.warn('[Twitter Service] TWITTER_BEARER_TOKEN not configured - Twitter features unavailable');
     return null;
   }
 

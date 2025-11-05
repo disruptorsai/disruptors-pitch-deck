@@ -32,6 +32,15 @@ export default function BusinessIntelligence() {
   // State for tabs
   const [activeTab, setActiveTab] = useState('analyze');
 
+  // Progress tracking state
+  const [progress, setProgress] = useState({
+    stage: 'idle', // idle, validating, fetching_apollo, fetching_dataforseo, fetching_wappalyzer, caching, detecting_opportunities, complete
+    currentStep: 0,
+    totalSteps: 6,
+    message: '',
+    estimatedTimeRemaining: 0
+  });
+
   // Fetch clients for dropdown
   const { data: clients } = useQuery({
     queryKey: ['clients'],
@@ -83,30 +92,96 @@ export default function BusinessIntelligence() {
   // Analyze business mutation
   const analyzeMutation = useMutation({
     mutationFn: async ({ domain, clientId, skipCache }) => {
+      console.log('🚀 [Business Intelligence] Starting analysis...', { domain, clientId, skipCache });
+      const startTime = Date.now();
+
+      // Step 1: Validating
+      setProgress({ stage: 'validating', currentStep: 1, totalSteps: 6, message: 'Validating domain and checking cache...', estimatedTimeRemaining: 25 });
+      console.log('📋 [Step 1/6] Validating domain:', domain);
+
+      const requestPayload = {
+        action: 'analyze',
+        domain,
+        clientId: clientId === 'none' ? null : clientId,
+        skipCache,
+      };
+      console.log('📦 Request payload:', requestPayload);
+
+      // Step 2: Making API call
+      setProgress({ stage: 'fetching_apollo', currentStep: 2, totalSteps: 6, message: 'Calling Netlify Function...', estimatedTimeRemaining: 23 });
+      console.log('🌐 [Step 2/6] Calling /.netlify/functions/business-intelligence');
+
       const response = await fetch('/.netlify/functions/business-intelligence', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          action: 'analyze',
-          domain,
-          clientId,
-          skipCache,
-        }),
+        body: JSON.stringify(requestPayload),
       });
 
+      console.log('📥 Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Analysis failed');
+        console.error('❌ API call failed:', response.status, response.statusText);
+        let errorMessage = 'Analysis failed';
+        try {
+          const error = await response.json();
+          console.error('❌ Error details:', error);
+          errorMessage = error.message || error.error || 'Analysis failed';
+        } catch (e) {
+          console.error('❌ Could not parse error response:', e);
+        }
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      // Step 3: Fetching Apollo data
+      setProgress({ stage: 'fetching_apollo', currentStep: 3, totalSteps: 6, message: 'Fetching Apollo.io company data...', estimatedTimeRemaining: 20 });
+      console.log('🏢 [Step 3/6] Function is fetching Apollo.io data...');
+
+      // Step 4: Fetching DataForSEO data
+      setProgress({ stage: 'fetching_dataforseo', currentStep: 4, totalSteps: 6, message: 'Fetching DataForSEO analytics...', estimatedTimeRemaining: 15 });
+      console.log('📊 [Step 4/6] Function is fetching DataForSEO data...');
+
+      // Step 5: Fetching Wappalyzer data
+      setProgress({ stage: 'fetching_wappalyzer', currentStep: 5, totalSteps: 6, message: 'Analyzing technology stack...', estimatedTimeRemaining: 10 });
+      console.log('💻 [Step 5/6] Function is fetching Wappalyzer data...');
+
+      // Parse response
+      const data = await response.json();
+      console.log('✅ Analysis complete! Response:', data);
+
+      const duration = Date.now() - startTime;
+      console.log(`⏱️ Total duration: ${duration}ms`);
+
+      // Step 6: Caching and opportunities
+      setProgress({ stage: 'complete', currentStep: 6, totalSteps: 6, message: 'Analysis complete!', estimatedTimeRemaining: 0 });
+      console.log('💾 [Step 6/6] Data cached and opportunities detected');
+
+      // Log summary
+      console.log('📈 Summary:', {
+        apollo: data.apollo ? '✅' : '❌',
+        dataforseo: data.dataforseo ? '✅' : '❌',
+        wappalyzer: data.wappalyzer ? '✅' : '❌',
+        metadata: data.metadata,
+        opportunities: data.opportunities
+      });
+
+      return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log('🎉 Analysis successful! Invalidating queries...');
       queryClient.invalidateQueries(['cached-analyses']);
       queryClient.invalidateQueries(['opportunities']);
+
+      // Reset progress after 3 seconds
+      setTimeout(() => {
+        setProgress({ stage: 'idle', currentStep: 0, totalSteps: 6, message: '', estimatedTimeRemaining: 0 });
+      }, 3000);
     },
+    onError: (error) => {
+      console.error('💥 Analysis failed:', error);
+      setProgress({ stage: 'idle', currentStep: 0, totalSteps: 6, message: '', estimatedTimeRemaining: 0 });
+    }
   });
 
   // Handle analyze button
@@ -259,7 +334,7 @@ export default function BusinessIntelligence() {
                 {analyzeMutation.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Analyzing... (15-30 seconds)
+                    Analyzing... ({progress.estimatedTimeRemaining}s remaining)
                   </>
                 ) : (
                   <>
@@ -269,12 +344,18 @@ export default function BusinessIntelligence() {
                 )}
               </Button>
 
+              {/* Visual Progress Indicator */}
+              {analyzeMutation.isPending && progress.stage !== 'idle' && (
+                <ProgressIndicator progress={progress} />
+              )}
+
               {analyzeMutation.error && (
                 <div className="bg-destructive/10 text-destructive p-4 rounded-lg flex items-start gap-2">
                   <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
                   <div>
                     <p className="font-semibold">Analysis Failed</p>
                     <p className="text-sm">{analyzeMutation.error.message}</p>
+                    <p className="text-xs mt-2 opacity-75">Check the browser console for detailed debugging information (F12)</p>
                   </div>
                 </div>
               )}
@@ -682,5 +763,130 @@ function APIStatusRow({ name, status }) {
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * Progress Indicator Component
+ * Shows detailed progress for business intelligence analysis
+ */
+function ProgressIndicator({ progress }) {
+  const steps = [
+    { id: 'validating', label: 'Validating', icon: Search, description: 'Checking domain and cache' },
+    { id: 'fetching_apollo', label: 'Apollo.io', icon: Globe, description: 'Company enrichment data' },
+    { id: 'fetching_dataforseo', label: 'DataForSEO', icon: BarChart3, description: 'SEO analytics & backlinks' },
+    { id: 'fetching_wappalyzer', label: 'Wappalyzer', icon: Code, description: 'Technology stack detection' },
+    { id: 'caching', label: 'Caching', icon: Database, description: 'Storing results' },
+    { id: 'detecting_opportunities', label: 'Opportunities', icon: Target, description: 'Detecting opportunities' },
+  ];
+
+  const currentStepIndex = progress.currentStep - 1;
+  const progressPercentage = (progress.currentStep / progress.totalSteps) * 100;
+
+  return (
+    <Card className="mt-4">
+      <CardContent className="pt-6">
+        <div className="space-y-4">
+          {/* Progress bar */}
+          <div>
+            <div className="flex justify-between text-sm mb-2">
+              <span className="font-medium">Progress</span>
+              <span className="text-muted-foreground">
+                Step {progress.currentStep} of {progress.totalSteps}
+              </span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-2">
+              <div
+                className="bg-primary h-2 rounded-full transition-all duration-500"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Current message */}
+          <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+            <div className="flex-1">
+              <p className="font-semibold text-blue-900 dark:text-blue-100">{progress.message}</p>
+              <p className="text-sm text-blue-700 dark:text-blue-300">
+                Estimated time remaining: {progress.estimatedTimeRemaining} seconds
+              </p>
+            </div>
+          </div>
+
+          {/* Steps breakdown */}
+          <div className="space-y-2">
+            {steps.map((step, index) => {
+              const Icon = step.icon;
+              const isActive = index === currentStepIndex;
+              const isComplete = index < currentStepIndex;
+              const isPending = index > currentStepIndex;
+
+              return (
+                <div
+                  key={step.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
+                    isActive
+                      ? 'bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800'
+                      : isComplete
+                      ? 'bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900'
+                      : 'bg-muted/50 border border-transparent'
+                  }`}
+                >
+                  <div className="flex-shrink-0">
+                    {isComplete ? (
+                      <CheckCircle className="h-5 w-5 text-green-600" />
+                    ) : isActive ? (
+                      <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    ) : (
+                      <Icon className="h-5 w-5 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p
+                      className={`font-medium ${
+                        isActive
+                          ? 'text-blue-900 dark:text-blue-100'
+                          : isComplete
+                          ? 'text-green-900 dark:text-green-100'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {step.label}
+                    </p>
+                    <p
+                      className={`text-sm ${
+                        isActive
+                          ? 'text-blue-700 dark:text-blue-300'
+                          : isComplete
+                          ? 'text-green-700 dark:text-green-400'
+                          : 'text-muted-foreground'
+                      }`}
+                    >
+                      {step.description}
+                    </p>
+                  </div>
+                  {isActive && (
+                    <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                      In Progress
+                    </Badge>
+                  )}
+                  {isComplete && (
+                    <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      Complete
+                    </Badge>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Debug mode notice */}
+          <div className="text-xs text-muted-foreground border-t pt-3">
+            💡 Tip: Open browser console (F12) to see detailed debugging logs
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

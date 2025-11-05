@@ -19,8 +19,10 @@ async function getRedditAccessToken() {
   const clientSecret = process.env.REDDIT_CLIENT_SECRET;
   const userAgent = process.env.REDDIT_USER_AGENT || 'AI-Presenter-Business-Analyzer/1.0';
 
-  if (!clientId || !clientSecret) {
-    console.warn('[Reddit Service] No API credentials configured');
+  if (!clientId || !clientSecret ||
+      clientId === 'your-reddit-client-id-here' ||
+      clientSecret === 'your-reddit-client-secret-here') {
+    console.warn('[Reddit Service] REDDIT_CLIENT_ID/SECRET not configured - Reddit features unavailable');
     return null;
   }
 
