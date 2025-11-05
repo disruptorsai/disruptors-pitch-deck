@@ -22,7 +22,7 @@ const headers = {
 // Initialize Supabase client
 const getSupabaseClient = () => {
   const url = process.env.VITE_SUPABASE_URL;
-  const key = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !key) {
     throw new Error('Supabase credentials not configured');
