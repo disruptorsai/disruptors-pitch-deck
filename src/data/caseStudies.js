@@ -1,0 +1,291 @@
+import { TrendingUp, Clock, Users, CheckCircle, Target, Globe, Zap, Briefcase, DollarSign } from 'lucide-react';
+
+/**
+ * Consolidated case study data for presentation
+ * Each case includes: client info, metrics, services, testimonials, and media
+ *
+ * Industries covered:
+ * - Healthcare & Wellness (3 cases)
+ * - Financial Services (1 case)
+ * - Construction & Trades (2 cases)
+ * - Industrial/B2B (1 case)
+ * - Services (Audio, Fitness, Cognitive Training)
+ */
+
+export const caseStudies = [
+  {
+    name: 'the-wellness-way',
+    client: 'The Wellness Way',
+    title: 'The Wellness Way Digital Health Platform',
+    path: 'work-the-wellness-way',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167810/case-studies/case-studies/thewellnessway_logo.webp',
+    heroImage: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Healthcare & Wellness',
+    companySize: '50-200',
+    overview: 'Created a comprehensive wellness platform that connects practitioners with patients through innovative AI-powered health assessments.',
+    challenge: 'Fragmented patient communication, inconsistent health information delivery, and limited scalability of personalized wellness programs.',
+    approach: 'Developed an integrated platform featuring AI health assessments, personalized wellness plans, and robust content management system.',
+    results: [
+      { icon: Users, value: '2M+', label: 'Social Media Views' },
+      { icon: TrendingUp, value: '+450%', label: 'Patient Acquisition' },
+      { icon: Clock, value: '-70%', label: 'Admin Time' },
+      { icon: CheckCircle, value: '96%', label: 'Patient Satisfaction' },
+    ],
+    services: [
+      { icon: Globe, name: 'Health Platform' },
+      { icon: Zap, name: 'AI Assessments' },
+      { icon: Target, name: 'Content Systems' },
+    ],
+    testimonial: 'I\'ve gotten millions of views on my social media and a large uptick in new patients. The strategy is significantly better than the 5 other marketing companies I\'ve worked with.',
+  },
+  {
+    name: 'timber-view-financial',
+    client: 'Timberview Capital',
+    title: 'Timberview Capital Brand & Digital Strategy',
+    path: 'work-timber-view-financial',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167811/case-studies/case-studies/timberviewfinancial_logo.webp',
+    heroImage: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Financial Services',
+    companySize: '10-50',
+    overview: 'Repositioned a regional financial firm with a sophisticated brand identity and digital presence that attracts high-net-worth clients.',
+    challenge: 'Generic branding and outdated digital presence failed to communicate expertise and build trust with affluent prospects.',
+    approach: 'Complete brand refresh with premium positioning, modern website with trust-building content, and strategic SEO targeting wealthy demographics.',
+    results: [
+      { icon: DollarSign, value: '+340%', label: 'Qualified Leads' },
+      { icon: Users, value: '+215%', label: 'HNW Clients' },
+      { icon: TrendingUp, value: '+180%', label: 'AUM Growth' },
+      { icon: CheckCircle, value: '4.8/5', label: 'Client Rating' },
+    ],
+    services: [
+      { icon: Target, name: 'Brand Strategy' },
+      { icon: Globe, name: 'Web Design' },
+      { icon: Zap, name: 'SEO Optimization' },
+    ],
+    testimonial: 'Our new brand and website position us exactly where we want to be in the market. The results speak for themselves.',
+  },
+  {
+    name: 'tradeworx-usa',
+    client: 'TradeWorx USA',
+    title: 'TradeWorx USA Digital Transformation',
+    path: 'work-tradeworx-usa',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167812/case-studies/case-studies/tradeworxusa_logo.svg',
+    heroImage: 'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Construction & Trading',
+    companySize: '50-200',
+    overview: 'A complete digital overhaul that modernized TradeWorx USA\'s operations and significantly improved their customer acquisition and retention rates.',
+    challenge: 'Outdated systems, manual processes, and limited online presence were hindering growth and efficiency in a competitive market.',
+    approach: 'Comprehensive digital transformation including modern web platform, automated workflows, and integrated CRM system with AI-powered lead scoring.',
+    results: [
+      { icon: TrendingUp, value: '+185%', label: 'Lead Generation' },
+      { icon: Clock, value: '-65%', label: 'Process Time' },
+      { icon: Users, value: '+120%', label: 'Customer Retention' },
+      { icon: CheckCircle, value: '98%', label: 'System Uptime' },
+    ],
+    services: [
+      { icon: Globe, name: 'Web Development' },
+      { icon: Zap, name: 'Process Automation' },
+      { icon: Target, name: 'CRM Integration' },
+    ],
+    testimonial: 'The team transformed our entire operation. We\'ve never been more efficient or profitable.',
+  },
+  {
+    name: 'segpro',
+    client: 'SegPro Solutions',
+    title: 'SegPro Solutions Industrial Safety Platform',
+    path: 'work-segpro',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167808/case-studies/case-studies/segpro_logo.png',
+    heroImage: 'https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Industrial Safety',
+    companySize: '50-200',
+    overview: 'Transformed an industrial safety supplier into a digital-first operation with e-commerce and automated lead generation.',
+    challenge: 'Manual ordering processes, limited product visibility, and difficulty serving a growing customer base across multiple states.',
+    approach: 'Built e-commerce platform with B2B features, automated quote system, and digital catalog with smart product recommendations.',
+    results: [
+      { icon: DollarSign, value: '+420%', label: 'Online Revenue' },
+      { icon: Clock, value: '-80%', label: 'Order Processing' },
+      { icon: Users, value: '+310%', label: 'Active Customers' },
+      { icon: TrendingUp, value: '+265%', label: 'Average Order Size' },
+    ],
+    services: [
+      { icon: Globe, name: 'E-commerce Platform' },
+      { icon: Zap, name: 'Order Automation' },
+      { icon: Target, name: 'B2B Integration' },
+    ],
+    testimonial: 'We went from struggling to fulfill orders to serving customers across 15 states. This platform changed everything.',
+  },
+  {
+    name: 'muscle-works',
+    client: 'Muscle Works',
+    title: 'Muscle Works Fitness Studio Growth',
+    path: 'work-muscle-works',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1759862158/case-studies/case-studies/muscleworks_logo.png',
+    heroImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Fitness & Wellness',
+    companySize: '10-50',
+    overview: 'Scaled a local fitness studio to 3 locations with membership automation and lead generation systems.',
+    challenge: 'Manual membership management, inconsistent lead follow-up, and difficulty attracting committed clients.',
+    approach: 'Automated membership platform, targeted local advertising, email nurture sequences, and class booking system.',
+    results: [
+      { icon: Users, value: '+550%', label: 'Memberships' },
+      { icon: TrendingUp, value: '3x', label: 'Locations Opened' },
+      { icon: DollarSign, value: '+380%', label: 'Monthly Revenue' },
+      { icon: Clock, value: '-75%', label: 'Admin Work' },
+    ],
+    services: [
+      { icon: Zap, name: 'Membership Automation' },
+      { icon: Target, name: 'Local Marketing' },
+      { icon: Globe, name: 'Booking System' },
+    ],
+    testimonial: 'We went from one struggling studio to three thriving locations. The automation lets us focus on our clients.',
+  },
+  {
+    name: 'granite-paving',
+    client: 'Granite Paving',
+    title: 'Granite Paving Digital Growth Platform',
+    path: 'work-granite-paving',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167806/case-studies/case-studies/granitepaving_logo.png',
+    heroImage: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Construction & Landscaping',
+    companySize: '10-50',
+    overview: 'Built a comprehensive digital platform that transformed Granite Paving from local contractor to regional leader.',
+    challenge: 'Limited online presence, manual project management, and difficulty showcasing completed work.',
+    approach: 'Created digital ecosystem with showcase website, project management tools, and automated lead generation with portfolio.',
+    results: [
+      { icon: TrendingUp, value: '+380%', label: 'Lead Generation' },
+      { icon: Clock, value: '-65%', label: 'Project Timeline' },
+      { icon: Users, value: '+250%', label: 'Service Area' },
+      { icon: CheckCircle, value: '98%', label: 'Client Satisfaction' },
+    ],
+    services: [
+      { icon: Globe, name: 'Showcase Website' },
+      { icon: Zap, name: 'Project Management' },
+      { icon: Target, name: 'Lead Generation' },
+    ],
+    testimonial: 'Our business has grown exponentially since launching the new platform. The project showcases are incredible.',
+  },
+  {
+    name: 'neuro-mastery',
+    client: 'Neuro Mastery',
+    title: 'Neuro Mastery Cognitive Training Platform',
+    path: 'work-neuro-mastery',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167807/case-studies/case-studies/neuromastery_logo.webp',
+    heroImage: 'https://images.unsplash.com/photo-1559757175-0eb30cd8c063?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Health & Cognitive Training',
+    companySize: '10-50',
+    overview: 'Launched a subscription-based cognitive training platform with gamified exercises and progress tracking.',
+    challenge: 'Complex neuroscience concepts needed to be accessible, engaging platform required to retain subscribers.',
+    approach: 'Gamified learning experience with AI-powered personalization, subscription management, and community features.',
+    results: [
+      { icon: Users, value: '12K+', label: 'Active Subscribers' },
+      { icon: Clock, value: '45min', label: 'Avg Session Time' },
+      { icon: TrendingUp, value: '89%', label: 'Retention Rate' },
+      { icon: CheckCircle, value: '4.9/5', label: 'App Store Rating' },
+    ],
+    services: [
+      { icon: Globe, name: 'Platform Development' },
+      { icon: Zap, name: 'AI Personalization' },
+      { icon: Briefcase, name: 'Subscription System' },
+    ],
+    testimonial: 'The platform makes complex neuroscience accessible and fun. Our retention rates are industry-leading.',
+  },
+  {
+    name: 'sound-corrections',
+    client: 'Sound Corrections',
+    title: 'Sound Corrections Audio Engineering Brand',
+    path: 'work-sound-corrections',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167809/case-studies/case-studies/soundcorrections_logo.svg',
+    heroImage: 'https://images.unsplash.com/photo-1519824145371-296894a0daa9?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Audio Engineering & Production',
+    companySize: '1-10',
+    overview: 'Positioned a boutique audio engineering firm as the premier choice for professional musicians and studios.',
+    challenge: 'Limited visibility in a crowded market and difficulty showcasing technical expertise to attract high-end clients.',
+    approach: 'Portfolio-focused website with audio samples, SEO for music production keywords, and strategic content marketing to build authority.',
+    results: [
+      { icon: TrendingUp, value: '+280%', label: 'Studio Bookings' },
+      { icon: DollarSign, value: '+195%', label: 'Project Value' },
+      { icon: Users, value: '+350%', label: 'Portfolio Traffic' },
+      { icon: CheckCircle, value: '5.0/5', label: 'Client Reviews' },
+    ],
+    services: [
+      { icon: Globe, name: 'Portfolio Website' },
+      { icon: Target, name: 'SEO Strategy' },
+      { icon: Zap, name: 'Content Marketing' },
+    ],
+    testimonial: 'The portfolio site showcases our work perfectly. We\'re booking premium projects we could only dream of before.',
+  },
+  {
+    name: 'auto-trim-utah',
+    client: 'Auto Trim Utah',
+    title: 'Auto Trim Utah Automotive Services',
+    path: 'work-auto-trim-utah',
+    logo: 'https://res.cloudinary.com/dvcvxhzmt/image/upload/v1758167805/case-studies/case-studies/autotrimutah_logo.png',
+    heroImage: 'https://images.unsplash.com/photo-1619642751034-765dfdf7c58e?q=80&w=2070&auto=format&fit=crop',
+    video: null,
+    industry: 'Automotive Services',
+    companySize: '1-10',
+    overview: 'Positioned a specialty auto trim shop as the premier destination for custom vehicle modifications.',
+    challenge: 'Limited visibility beyond word-of-mouth and difficulty showcasing custom work to attract premium clients.',
+    approach: 'Visual portfolio website, local SEO domination, before/after galleries, and automated appointment booking.',
+    results: [
+      { icon: TrendingUp, value: '+290%', label: 'Bookings' },
+      { icon: DollarSign, value: '+165%', label: 'Avg Job Value' },
+      { icon: Users, value: '+420%', label: 'Website Traffic' },
+      { icon: CheckCircle, value: '4.9/5', label: 'Google Rating' },
+    ],
+    services: [
+      { icon: Globe, name: 'Portfolio Website' },
+      { icon: Target, name: 'Local SEO' },
+      { icon: Zap, name: 'Booking System' },
+    ],
+    testimonial: 'The website showcases our craftsmanship perfectly. We\'re booked solid with premium jobs.',
+  },
+];
+
+/**
+ * Filter case studies by industry
+ */
+export function filterByIndustry(targetIndustry, maxResults = 3) {
+  if (!targetIndustry) return caseStudies.slice(0, maxResults);
+
+  const exactMatches = caseStudies.filter(c =>
+    c.industry.toLowerCase().includes(targetIndustry.toLowerCase())
+  );
+
+  if (exactMatches.length >= maxResults) {
+    return exactMatches.slice(0, maxResults);
+  }
+
+  // If not enough exact matches, add related industries
+  const remaining = maxResults - exactMatches.length;
+  const others = caseStudies.filter(c =>
+    !c.industry.toLowerCase().includes(targetIndustry.toLowerCase())
+  ).slice(0, remaining);
+
+  return [...exactMatches, ...others];
+}
+
+/**
+ * Filter case studies by company size
+ */
+export function filterByCompanySize(size, maxResults = 3) {
+  if (!size) return caseStudies.slice(0, maxResults);
+
+  const matches = caseStudies.filter(c => c.companySize === size);
+
+  if (matches.length >= maxResults) {
+    return matches.slice(0, maxResults);
+  }
+
+  const remaining = maxResults - matches.length;
+  const others = caseStudies.filter(c => c.companySize !== size).slice(0, remaining);
+
+  return [...matches, ...others];
+}

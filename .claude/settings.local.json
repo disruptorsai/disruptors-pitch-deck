@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir \"C:\\Users\\Will\\OneDrive\\Documents\\Projects\\dm4\\disruptors-ai-marketing-hub\")",
+      "WebSearch",
+      "WebFetch(domain:elevenlabs.io)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

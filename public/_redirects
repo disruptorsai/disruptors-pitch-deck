@@ -1,0 +1,3 @@
+# SPA fallback - redirect all routes to index.html
+# Netlify Functions are automatically excluded from this rule
+/*  /index.html  200
