@@ -26,7 +26,7 @@ export default function BusinessIntelligence() {
 
   // State for analysis form
   const [domain, setDomain] = useState('');
-  const [selectedClientId, setSelectedClientId] = useState('');
+  const [selectedClientId, setSelectedClientId] = useState('none');
   const [skipCache, setSkipCache] = useState(false);
 
   // State for tabs
@@ -115,7 +115,7 @@ export default function BusinessIntelligence() {
 
     analyzeMutation.mutate({
       domain: domain.trim(),
-      clientId: selectedClientId || null,
+      clientId: selectedClientId === 'none' ? null : selectedClientId,
       skipCache,
     });
   };
@@ -228,7 +228,7 @@ export default function BusinessIntelligence() {
                       <SelectValue placeholder="Select client (optional)" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">No client (exploration only)</SelectItem>
+                      <SelectItem value="none">No client (exploration only)</SelectItem>
                       {clients?.map((client) => (
                         <SelectItem key={client.id} value={client.id}>
                           {client.name}
