@@ -226,10 +226,17 @@ REDDIT_CLIENT_SECRET=your-reddit-secret
 
 ### Netlify Deployment
 
-**Project Information:**
+**Account & Project Information:**
+- **Netlify Account:** PRIMARY - DisruptorsAI
+- **Account Token:** nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06
 - **Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
-- **Dashboard:** https://app.netlify.com/sites/[your-site-name]/overview
+- **Site Name:** `aipresenterapp`
+- **Site URL:** https://aipresenterapp.netlify.app
+- **Dashboard:** https://app.netlify.com/sites/aipresenterapp/overview
+- **GitHub Repo:** disruptorsai/disruptors-pitch-deck
 - **Configuration:** `netlify.toml` (already configured)
+
+**⚠️ IMPORTANT:** This repository uses the PRIMARY DisruptorsAI account ONLY. Do NOT deploy to the secondary TechIntegrationLabs account (which is for disruptors-ai-marketing-hub).
 
 **Step-by-Step Deployment:**
 
@@ -237,17 +244,22 @@ REDDIT_CLIENT_SECRET=your-reddit-secret
 # 1. Install Netlify CLI
 npm install -g netlify-cli
 
-# 2. Login to Netlify
+# 2. Login to Netlify (use PRIMARY account)
 netlify login
+# Or set token directly:
+export NETLIFY_AUTH_TOKEN=nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06
 
 # 3. Link to existing site
 netlify link --id a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d
 
-# 4. Set environment variables in Netlify Dashboard
+# 4. Verify you're on the correct account
+netlify status
+
+# 5. Set environment variables in Netlify Dashboard
 # Go to: Site Settings → Environment Variables
 # Add ALL variables from .env.example (both VITE_ and non-VITE_)
 
-# 5. Deploy to production
+# 6. Deploy to production
 netlify deploy --prod
 
 # Or connect GitHub repository for automatic deployments

@@ -13,7 +13,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - State: TanStack React Query for data fetching
 - Styling: Tailwind CSS + shadcn/ui components
 - Deployment: Netlify with Serverless Functions
+
+**Netlify Account Configuration:**
+- **Account:** PRIMARY - DisruptorsAI (nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06)
 - **Netlify Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
+- **Site Name:** `aipresenterapp`
+- **Site URL:** https://aipresenterapp.netlify.app
+- **Admin URL:** https://app.netlify.com/sites/aipresenterapp/overview
+- **Account Slug:** disruptorsai
+- **IMPORTANT:** This repository uses the PRIMARY DisruptorsAI account ONLY. The secondary TechIntegrationLabs account is for a different project (disruptors-ai-marketing-hub).
 
 ## Essential Commands
 
@@ -286,9 +294,14 @@ Automatically captured: IP, user agent, referrer, timestamp.
 
 **Platform:** Netlify
 
-**Netlify Project:**
+**Netlify Account & Project:**
+- **Account:** PRIMARY - DisruptorsAI
+- **Account Token:** nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06
 - **Project ID:** `a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d`
-- **Dashboard:** https://app.netlify.com/sites/[site-name]/overview
+- **Site Name:** `aipresenterapp`
+- **Site URL:** https://aipresenterapp.netlify.app
+- **Dashboard:** https://app.netlify.com/sites/aipresenterapp/overview
+- **GitHub Repo:** disruptorsai/disruptors-pitch-deck
 
 **Build settings:**
 - Command: `npm run build`
@@ -299,12 +312,25 @@ Automatically captured: IP, user agent, referrer, timestamp.
 
 **Deployment workflow:**
 1. Push to main branch (auto-deploy enabled)
-2. Or: `netlify deploy --prod`
+2. Or: `netlify deploy --prod` (uses primary account token)
 3. Netlify builds `dist/` and deploys functions to `/.netlify/functions/`
 
 **Build output:** Vite produces optimized SPA in `dist/` directory
 
 **Functions deployment:** All `.js` files in `netlify/functions/` are automatically deployed as serverless functions
+
+**⚠️ IMPORTANT - Account Authentication:**
+When using Netlify CLI locally, ensure you're authenticated with the PRIMARY account:
+```bash
+# Set environment variable for primary account
+export NETLIFY_AUTH_TOKEN=nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06
+
+# Or use netlify login (will prompt browser login)
+netlify login
+
+# Verify you're on the correct account
+netlify status
+```
 
 ## Development Workflow
 

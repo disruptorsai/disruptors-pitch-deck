@@ -1,5 +1,22 @@
 # Netlify Configuration
 # https://docs.netlify.com/configure-builds/file-based-configuration/
+#
+# ============================================================================
+# NETLIFY ACCOUNT CONFIGURATION
+# ============================================================================
+# This project is deployed on the PRIMARY DisruptorsAI Netlify account.
+#
+# Account Details:
+#   - Account: DisruptorsAI (PRIMARY)
+#   - Account Token: nfp_MnQi8ZEPrTaGqoT9TBdhba5k3BuDaQLBfb06
+#   - Project ID: a6bdb6e3-1806-47a7-8af3-eb71e7e0c42d
+#   - Site Name: aipresenterapp
+#   - Site URL: https://aipresenterapp.netlify.app
+#   - Dashboard: https://app.netlify.com/sites/aipresenterapp/overview
+#
+# IMPORTANT: Do NOT use the secondary TechIntegrationLabs account for this repo.
+# The secondary account is for the disruptors-ai-marketing-hub project.
+# ============================================================================
 
 [build]
   # Build command
