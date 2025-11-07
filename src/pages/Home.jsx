@@ -196,14 +196,32 @@ export default function Home() {
             {subheadline}
           </p>
 
-          {/* Industry badge if available */}
-          {client?.industry && (
-            <div className="mb-8 inline-block px-6 py-2 bg-white/5 border border-white/10 rounded-full">
-              <span className="text-sm text-white/70">
-                {client.industry}
-                {client.sub_industry && ` • ${client.sub_industry}`}
-              </span>
+          {/* Industry & Company Info Badges */}
+          {(client?.industry || client?.company_size) && (
+            <div className="mb-8 flex flex-wrap justify-center gap-3">
+              {client?.industry && (
+                <div className="px-6 py-2 bg-white/5 border border-white/10 rounded-full">
+                  <span className="text-sm text-white/70">
+                    {client.industry}
+                    {client.sub_industry && ` • ${client.sub_industry}`}
+                  </span>
+                </div>
+              )}
+              {client?.company_size && (
+                <div className="px-6 py-2 bg-white/5 border border-white/10 rounded-full">
+                  <span className="text-sm text-white/70">
+                    {client.company_size}
+                  </span>
+                </div>
+              )}
             </div>
+          )}
+
+          {/* Competitive Advantage Teaser */}
+          {client?.competitive_advantages?.[0] && (
+            <p className="text-lg text-white/60 mb-8 max-w-2xl mx-auto">
+              "{client.competitive_advantages[0]}"
+            </p>
           )}
         </motion.div>
 

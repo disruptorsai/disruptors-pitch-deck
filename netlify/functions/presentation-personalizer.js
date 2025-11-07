@@ -1,26 +1,23 @@
 /**
  * Netlify Function: Presentation Personalizer
  *
- * Server-side AI personalization using Anthropic API
- * Keeps API keys secure and prevents client-side exposure
+ * Server-side AI personalization using Claude Sonnet 4.5
+ * Keeps ANTHROPIC_API_KEY secure on the server
+ *
+ * Actions:
+ * - generateHero: Hero section personalization
+ * - generateIntro: Introduction content
+ * - generateDiagnostic: Competitive analysis
+ * - generateBlueprint: Custom strategy & service recommendations
+ * - generateCapabilities: Ranked service recommendations
+ * - generateCaseStudies: Case study filtering & relevance
+ * - generatePricing: Pricing tier recommendations with ROI
+ * - generateCTA: Call-to-action personalization
+ * - generateEntirePresentation: All sections in parallel (recommended)
  */
 
 import Anthropic from '@anthropic-ai/sdk';
 
-const MODEL = 'claude-sonnet-4-5-20250929';
-
-// Initialize Anthropic client with server-side API key
-const getAnthropicClient = () => {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('ANTHROPIC_API_KEY not configured');
-  }
-
-  return new Anthropic({ apiKey });
-};
-
-// CORS headers
 const headers = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'Content-Type',
@@ -28,20 +25,466 @@ const headers = {
   'Content-Type': 'application/json',
 };
 
+const MODEL = 'claude-sonnet-4-5-20250929';
+
+// Initialize Anthropic client
+const getAnthropicClient = () => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('ANTHROPIC_API_KEY not configured in Netlify environment variables');
+  }
+
+  return new Anthropic({ apiKey });
+};
+
+/**
+ * Parse JSON from Claude's response
+ */
+function parseAIResponse(content) {
+  if (content.type === 'text') {
+    const jsonMatch = content.text.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    }
+  }
+  throw new Error('Failed to parse AI response - no valid JSON found');
+}
+
+/**
+ * Generate personalized hero section content
+ */
+async function generateHeroContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Create a compelling hero section for "${client.name}" in the ${client.industry || 'business'} industry.
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  subIndustry: client.sub_industry,
+  targetMarket: client.target_market,
+  topOpportunity: client.opportunities?.[0],
+  competitors: client.potential_competitors?.slice(0, 3),
+  companySize: client.company_size,
+  services: client.services,
+}, null, 2)}
+
+Generate a hero section that:
+1. **Headline**: Industry-specific hook (10-15 words) that directly addresses their #1 opportunity with urgency
+2. **Subheadline**: Value proposition for their target market (20-30 words) that mentions competitive advantage
+3. **CTA Text**: Action-oriented button text (3-5 words) that's specific to their industry
+
+Return ONLY valid JSON:
+{
+  "headline": "Transform Healthcare Operations with AI-Powered Patient Engagement",
+  "subheadline": "Help mid-market healthcare providers reduce administrative overhead by 40% while improving patient satisfaction—before your competitors automate their workflows",
+  "ctaText": "See Your Healthcare Strategy"
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate personalized introduction content
+ */
+async function generateIntroContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `You are creating a highly personalized AI presentation introduction for "${client.name}".
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  name: client.name,
+  industry: client.industry,
+  subIndustry: client.sub_industry,
+  services: client.services,
+  competitiveAdvantages: client.competitive_advantages,
+  potentialCompetitors: client.potential_competitors,
+  opportunities: client.opportunities,
+  marketPosition: client.market_position,
+}, null, 2)}
+
+Create a compelling introduction that:
+1. **Headline**: A powerful, industry-specific hook (8-12 words max) that shows you understand their business
+2. **Subheadline**: Specific value proposition (15-20 words) tailored to their market position
+3. **Opening Statement**: A personalized 2-3 sentence opener that demonstrates deep understanding of their business
+
+Be SPECIFIC - use their actual industry, competitors, and opportunities. Don't be generic.
+
+Return ONLY valid JSON:
+{
+  "headline": "Industry-Specific Headline Here",
+  "subheadline": "Personalized Value Prop Here",
+  "openingStatement": "Deep, personalized opening that shows real understanding..."
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate competitive diagnostic content
+ */
+async function generateDiagnosticContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Analyze the competitive landscape for "${client.name}" in ${client.industry || 'their industry'}.
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  competitors: client.potential_competitors,
+  strengths: client.strengths,
+  competitiveAdvantages: client.competitive_advantages,
+  opportunities: client.opportunities,
+  marketPosition: client.market_position,
+  websiteQuality: client.website_quality,
+  seoIndicators: client.seo_indicators,
+}, null, 2)}
+
+Create a comprehensive competitive analysis:
+1. Detailed competitor comparison (strengths, weaknesses, how we can help)
+2. SWOT analysis specific to their business
+3. Market insights for their industry
+4. AI-driven opportunities to outperform competitors
+
+Return ONLY valid JSON:
+{
+  "competitorComparison": [
+    {
+      "name": "Competitor A",
+      "strengths": ["Strong SEO", "Large social following"],
+      "weaknesses": ["Poor customer service", "Outdated tech"],
+      "ourAdvantage": "AI can help you match their SEO while exceeding their service quality"
+    }
+  ],
+  "swotAnalysis": {
+    "strengths": ["Strength 1", "Strength 2"],
+    "weaknesses": ["Weakness 1", "Weakness 2"],
+    "opportunities": ["Opportunity 1", "Opportunity 2"],
+    "threats": ["Threat 1", "Threat 2"]
+  },
+  "marketInsights": "The industry is shifting toward automation...",
+  "aiOpportunities": ["Automate X", "AI-powered Y"]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 2048,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate AI-driven service recommendations and blueprint
+ */
+async function generateBlueprintContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Create a customized service recommendation blueprint for "${client.name}".
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  websiteQuality: client.website_quality,
+  hasBlog: client.has_blog,
+  seoIndicators: client.seo_indicators,
+  technologies: client.technologies_detected,
+  opportunities: client.opportunities,
+  companySize: client.company_size,
+  services: client.services,
+}, null, 2)}
+
+AVAILABLE SERVICES (select 3-5 most relevant):
+- Lead Generation & Nurturing
+- Paid Advertising (Google Ads, Meta)
+- SEO & Local SEO (GEO)
+- Content Marketing & Blog Strategy
+- Website Design & Development
+- Marketing Automation
+- Email Marketing Campaigns
+- Social Media Management
+- Fractional CMO Services
+- Analytics & Conversion Optimization
+
+Based on their data:
+1. Select 3-5 services that address their specific opportunities and gaps
+2. Explain WHY each service is critical for them
+3. Create a 30/60/90 day implementation timeline
+4. List expected outcomes
+
+Return ONLY valid JSON:
+{
+  "selectedServices": [
+    {
+      "name": "SEO & Local SEO",
+      "reason": "Website quality score of 4/10 and poor SEO indicators mean you're losing organic traffic to competitors",
+      "priority": 1
+    }
+  ],
+  "strategyRationale": "This combination addresses your immediate gaps...",
+  "implementationTimeline": [
+    {
+      "phase": "Days 1-30: Foundation",
+      "duration": "4 weeks",
+      "activities": ["SEO audit", "Content strategy", "Analytics setup"]
+    }
+  ],
+  "expectedOutcomes": ["40% increase in organic traffic", "25% reduction in CAC"]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 2048,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate capabilities recommendations
+ */
+async function generateCapabilitiesContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Rank and customize service descriptions for "${client.name}".
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  technologies: client.technologies_detected,
+  servicesOffered: client.services,
+  opportunities: client.opportunities,
+}, null, 2)}
+
+For each service category, determine relevance (0-1 score) and customize the description:
+1. How relevant is this service to their specific needs?
+2. Customize the description to mention their tech stack or opportunities
+3. Explain why it's relevant (or not)
+
+Return ONLY valid JSON:
+{
+  "rankedServices": [
+    {
+      "serviceId": "seo",
+      "relevanceScore": 0.9,
+      "customDescription": "SEO optimized for healthcare providers using WordPress",
+      "whyRelevant": "Your WordPress site needs SEO improvement based on your indicators"
+    }
+  ],
+  "topRecommendations": ["Start with SEO to fix immediate visibility issues"]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1536,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate case study recommendations
+ */
+async function generateCaseStudyContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Recommend which case studies to show "${client.name}" in the ${client.industry || 'business'} industry.
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  subIndustry: client.sub_industry,
+  companySize: client.company_size,
+  opportunities: client.opportunities,
+  services: client.services,
+}, null, 2)}
+
+Provide guidance on:
+1. Which industries' case studies would be most relevant
+2. Industry-specific insights to highlight
+3. Key metrics that matter most to this type of business
+
+Return ONLY valid JSON:
+{
+  "relevantCases": [
+    {
+      "caseId": "healthcare-automation",
+      "relevanceScore": 0.95,
+      "whyThisMatters": "Like this provider, you're in healthcare facing similar challenges"
+    }
+  ],
+  "industryInsights": "Healthcare providers who implement AI automation typically see 30-50% reduction in admin time",
+  "keyMetrics": ["Time saved", "Cost reduction", "Patient satisfaction"]
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1536,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate pricing recommendations
+ */
+async function generatePricingContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Recommend pricing tier for "${client.name}".
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  companySize: client.company_size,
+  websiteQuality: client.website_quality,
+  technologies: client.technologies_detected,
+  opportunities: client.opportunities,
+}, null, 2)}
+
+AVAILABLE TIERS:
+- Starter: $2,500-5,000/month (1-10 employees, basic needs)
+- Growth: $5,000-15,000/month (10-100 employees, scaling businesses)
+- Enterprise: $15,000+/month (100+ employees, complex needs)
+
+Based on their size and complexity:
+1. Recommend the most appropriate tier
+2. Explain why this tier fits
+3. Calculate industry-specific ROI
+4. Provide comparison text
+
+Return ONLY valid JSON:
+{
+  "recommendedTier": "Growth",
+  "rationale": "Your team size (50 employees) fits the Growth tier perfectly",
+  "roiProjection": {
+    "investment": 120000,
+    "projectedReturn": 264000,
+    "roi": 120,
+    "paybackMonths": 5
+  },
+  "comparisonText": "Companies like yours typically invest $5k-10k/month and see 2.2x ROI"
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate call-to-action content
+ */
+async function generateCTAContent(client) {
+  const anthropic = getAnthropicClient();
+
+  const prompt = `Create a compelling call-to-action for "${client.name}".
+
+CLIENT INTELLIGENCE:
+${JSON.stringify({
+  industry: client.industry,
+  topOpportunity: client.opportunities?.[0],
+  competitors: client.potential_competitors?.slice(0, 2),
+  companySize: client.company_size,
+}, null, 2)}
+
+Create a CTA that:
+1. **Headline**: Personalized, action-oriented (8-12 words)
+2. **Subheadline**: Creates urgency by referencing their opportunity and competitors (20-30 words)
+3. **Primary Action**: Main CTA button text (3-5 words)
+4. **Secondary Action**: Alternative action (3-5 words)
+5. **Urgency Text**: Time/competitive urgency (15-20 words)
+6. **Social Proof**: Industry-specific testimonial snippet (20-30 words)
+
+Return ONLY valid JSON:
+{
+  "headline": "Ready to Transform Healthcare Operations at Acme Health?",
+  "subheadline": "Schedule a strategy call to discover how AI can reduce your admin overhead by 40%",
+  "primaryActionText": "Schedule Strategy Call",
+  "secondaryActionText": "Download Case Studies",
+  "urgencyText": "Book this week to receive a complimentary workflow audit ($2,500 value)",
+  "socialProof": "Healthcare providers like you have reduced admin time by 60% in just 90 days"
+}`;
+
+  const message = await anthropic.messages.create({
+    model: MODEL,
+    max_tokens: 1024,
+    messages: [{ role: 'user', content: prompt }],
+  });
+
+  return parseAIResponse(message.content[0]);
+}
+
+/**
+ * Generate entire presentation (all sections in parallel)
+ */
+async function generateEntirePresentation(client) {
+  console.log('[Presentation Personalizer] Generating entire presentation for:', client.name);
+
+  // Generate all sections in parallel for speed
+  const [hero, intro, diagnostic, blueprint, capabilities, caseStudies, pricing, cta] =
+    await Promise.all([
+      generateHeroContent(client),
+      generateIntroContent(client),
+      generateDiagnosticContent(client),
+      generateBlueprintContent(client),
+      generateCapabilitiesContent(client),
+      generateCaseStudyContent(client),
+      generatePricingContent(client),
+      generateCTAContent(client),
+    ]);
+
+  return {
+    hero,
+    intro,
+    diagnostic,
+    blueprint,
+    capabilities,
+    caseStudies,
+    pricing,
+    cta,
+    metadata: {
+      generatedAt: new Date().toISOString(),
+      clientName: client.name,
+      industry: client.industry || 'Unknown',
+      personalizationQuality: client.full_description ? 'high' : 'medium',
+    },
+  };
+}
+
+/**
+ * Main handler
+ */
 export const handler = async (event, context) => {
   console.log('[Presentation Personalizer] Function invoked');
-  console.log('[Presentation Personalizer] HTTP Method:', event.httpMethod);
 
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
-  // Only allow POST requests
+  // Only allow POST
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
@@ -56,43 +499,68 @@ export const handler = async (event, context) => {
 
     // Check API key configuration
     if (!process.env.ANTHROPIC_API_KEY) {
-      console.error('[Presentation Personalizer] ERROR: ANTHROPIC_API_KEY not configured');
+      console.error('[Presentation Personalizer] ANTHROPIC_API_KEY not configured');
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
-          error: 'Configuration error',
-          message: 'ANTHROPIC_API_KEY not configured',
+          error: 'Server configuration error',
+          message: 'ANTHROPIC_API_KEY not configured in Netlify environment variables',
         }),
       };
     }
 
-    const anthropic = getAnthropicClient();
+    const { client } = payload || {};
+
+    if (!client || !client.name) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          error: 'Invalid request',
+          message: 'payload.client is required with at least a name field',
+        }),
+      };
+    }
+
+    let result;
 
     switch (action) {
-      case 'personalizeHero':
-        return await personalizeHero(anthropic, payload);
+      case 'generateHero':
+        result = await generateHeroContent(client);
+        break;
 
-      case 'personalizeBlueprint':
-        return await personalizeBlueprint(anthropic, payload);
+      case 'generateIntro':
+        result = await generateIntroContent(client);
+        break;
 
-      case 'personalizeDiagnostic':
-        return await personalizeDiagnostic(anthropic, payload);
+      case 'generateDiagnostic':
+        result = await generateDiagnosticContent(client);
+        break;
 
-      case 'personalizeIntroduction':
-        return await personalizeIntroduction(anthropic, payload);
+      case 'generateBlueprint':
+        result = await generateBlueprintContent(client);
+        break;
 
-      case 'personalizeCapabilities':
-        return await personalizeCapabilities(anthropic, payload);
+      case 'generateCapabilities':
+        result = await generateCapabilitiesContent(client);
+        break;
 
-      case 'personalizeCaseStudies':
-        return await personalizeCaseStudies(anthropic, payload);
+      case 'generateCaseStudies':
+        result = await generateCaseStudyContent(client);
+        break;
 
-      case 'personalizeTheProblem':
-        return await personalizeTheProblem(anthropic, payload);
+      case 'generatePricing':
+        result = await generatePricingContent(client);
+        break;
 
-      case 'personalizeWhyAI':
-        return await personalizeWhyAI(anthropic, payload);
+      case 'generateCTA':
+        result = await generateCTAContent(client);
+        break;
+
+      case 'generateEntirePresentation':
+        result = await generateEntirePresentation(client);
+        break;
 
       default:
         return {
@@ -100,20 +568,28 @@ export const handler = async (event, context) => {
           headers,
           body: JSON.stringify({
             error: 'Invalid action',
-            receivedAction: action,
             availableActions: [
-              'personalizeHero',
-              'personalizeBlueprint',
-              'personalizeDiagnostic',
-              'personalizeIntroduction',
-              'personalizeCapabilities',
-              'personalizeCaseStudies',
-              'personalizeTheProblem',
-              'personalizeWhyAI',
+              'generateHero',
+              'generateIntro',
+              'generateDiagnostic',
+              'generateBlueprint',
+              'generateCapabilities',
+              'generateCaseStudies',
+              'generatePricing',
+              'generateCTA',
+              'generateEntirePresentation',
             ],
           }),
         };
     }
+
+    console.log('[Presentation Personalizer] Success:', action);
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify(result),
+    };
   } catch (error) {
     console.error('[Presentation Personalizer] ERROR:', error);
     return {
@@ -122,421 +598,8 @@ export const handler = async (event, context) => {
       body: JSON.stringify({
         error: 'Internal server error',
         message: error instanceof Error ? error.message : 'Unknown error',
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       }),
     };
   }
 };
-
-/**
- * Personalize Hero slide content
- */
-async function personalizeHero(anthropic, payload) {
-  const { clientData, companyIntelligence } = payload;
-
-  const prompt = `Generate personalized hero slide content for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Description: ${clientData.description || 'N/A'}
-- Business Model: ${companyIntelligence?.businessModel || 'N/A'}
-- Target Market: ${companyIntelligence?.targetMarket || 'N/A'}
-- Primary Challenge: ${companyIntelligence?.primaryChallenge || 'N/A'}
-
-Generate a compelling hero slide in JSON format:
-
-{
-  "headline": "Powerful, benefit-driven headline (max 60 chars)",
-  "subheadline": "Compelling value proposition (max 120 chars)",
-  "ctaText": "Action-oriented CTA button text (max 25 chars)",
-  "backgroundStyle": "dark|light|gradient"
-}
-
-Make it specific to their industry, target market, and primary challenge.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 1000,
-    temperature: 0.8,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Blueprint slide content
- */
-async function personalizeBlueprint(anthropic, payload) {
-  const { clientData, companyIntelligence, services } = payload;
-
-  const prompt = `Generate a personalized AI marketing blueprint for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Business Model: ${companyIntelligence?.businessModel || 'N/A'}
-- Target Market: ${companyIntelligence?.targetMarket || 'N/A'}
-- Primary Challenge: ${companyIntelligence?.primaryChallenge || 'N/A'}
-- Strategic Goals: ${companyIntelligence?.strategicGoals?.join(', ') || 'N/A'}
-
-Available Services:
-${services.map((s, i) => `${i + 1}. ${s.name} - ${s.description}`).join('\n')}
-
-Generate a strategic blueprint in JSON format:
-
-{
-  "selectedServices": [
-    {
-      "name": "Service name from the list above",
-      "reason": "Why this service is essential for this client",
-      "priority": 1-5 (5 = highest)
-    }
-  ],
-  "strategyRationale": "Overall strategic approach tailored to their needs (150-200 words)",
-  "implementationTimeline": [
-    {
-      "phase": "Phase name",
-      "duration": "Timeframe",
-      "activities": ["Activity 1", "Activity 2", "Activity 3"]
-    }
-  ],
-  "expectedOutcomes": ["Specific measurable outcome 1", "Specific measurable outcome 2", "Specific measurable outcome 3"]
-}
-
-Select 3-5 most relevant services. Focus on their primary challenge and strategic goals.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 3000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Diagnostic slide content
- */
-async function personalizeDiagnostic(anthropic, payload) {
-  const { clientData, companyIntelligence, competitiveAnalysis } = payload;
-
-  const prompt = `Generate a personalized competitive diagnostic for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Target Market: ${companyIntelligence?.targetMarket || 'N/A'}
-
-Competitive Analysis:
-${JSON.stringify(competitiveAnalysis, null, 2)}
-
-Generate a diagnostic comparison in JSON format:
-
-{
-  "competitorComparison": [
-    {
-      "name": "Competitor name",
-      "strengths": ["Strength 1", "Strength 2"],
-      "weaknesses": ["Weakness 1", "Weakness 2"],
-      "ourAdvantage": "How we outperform them"
-    }
-  ],
-  "marketGaps": ["Gap 1", "Gap 2", "Gap 3"],
-  "opportunityScore": 1-100,
-  "recommendations": ["Recommendation 1", "Recommendation 2", "Recommendation 3"]
-}
-
-Include 3-4 top competitors. Be specific and data-driven.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2500,
-    temperature: 0.6,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Introduction slide
- */
-async function personalizeIntroduction(anthropic, payload) {
-  const { clientData, companyIntelligence } = payload;
-
-  const prompt = `Generate a personalized introduction for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Description: ${clientData.description || 'N/A'}
-- Target Market: ${companyIntelligence?.targetMarket || 'N/A'}
-
-Generate introduction content in JSON format:
-
-{
-  "opening": "Engaging opening statement about AI marketing (2-3 sentences)",
-  "industryContext": "Why AI marketing matters in their industry (2-3 sentences)",
-  "valueProposition": "Our unique value proposition for them (2-3 sentences)",
-  "credibilityBuilders": ["Credibility point 1", "Credibility point 2", "Credibility point 3"]
-}
-
-Make it specific to their industry and target market.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 1500,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Capabilities slide
- */
-async function personalizeCapabilities(anthropic, payload) {
-  const { clientData, companyIntelligence } = payload;
-
-  const prompt = `Generate personalized AI capabilities highlighting for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Primary Challenge: ${companyIntelligence?.primaryChallenge || 'N/A'}
-- Strategic Goals: ${companyIntelligence?.strategicGoals?.join(', ') || 'N/A'}
-
-Generate capabilities content in JSON format:
-
-{
-  "capabilities": [
-    {
-      "title": "Capability name",
-      "description": "How this capability solves their specific challenge",
-      "examples": ["Industry-specific example 1", "Example 2"]
-    }
-  ],
-  "whyNow": "Why they need these AI capabilities now (2-3 sentences)",
-  "competitiveEdge": "How these capabilities give them an edge (2-3 sentences)"
-}
-
-Include 4-6 most relevant capabilities for their industry and challenges.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Case Studies slide
- */
-async function personalizeCaseStudies(anthropic, payload) {
-  const { clientData, companyIntelligence, caseStudies } = payload;
-
-  const prompt = `Select and personalize case studies for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Business Model: ${companyIntelligence?.businessModel || 'N/A'}
-- Primary Challenge: ${companyIntelligence?.primaryChallenge || 'N/A'}
-
-Available Case Studies:
-${caseStudies.map((cs, i) => `${i + 1}. ${cs.title} - ${cs.client_name} (${cs.industry}) - ${cs.challenge}`).join('\n')}
-
-Generate personalized case study presentation in JSON format:
-
-{
-  "selectedCaseStudies": [
-    {
-      "id": "case study ID from list",
-      "relevanceExplanation": "Why this is relevant to this client (1 sentence)",
-      "keyTakeaway": "Main lesson for this client (1 sentence)"
-    }
-  ],
-  "overviewText": "Why these case studies matter to this client (2-3 sentences)",
-  "callToAction": "Next step invitation specific to their situation (1 sentence)"
-}
-
-Select 2-3 most relevant case studies based on industry similarity and challenge alignment.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize The Problem slide
- */
-async function personalizeTheProblem(anthropic, payload) {
-  const { clientData, companyIntelligence } = payload;
-
-  const prompt = `Generate personalized problem statement for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Target Market: ${companyIntelligence?.targetMarket || 'N/A'}
-- Primary Challenge: ${companyIntelligence?.primaryChallenge || 'N/A'}
-- Pain Points: ${companyIntelligence?.painPoints?.join(', ') || 'N/A'}
-
-Generate problem articulation in JSON format:
-
-{
-  "problemStatement": "Clear, compelling problem statement for their industry (2-3 sentences)",
-  "painPoints": [
-    {
-      "title": "Pain point title",
-      "description": "Specific impact on their business",
-      "costOfInaction": "What happens if they don't solve this"
-    }
-  ],
-  "urgency": "Why this problem needs to be solved now (2-3 sentences)",
-  "industryStats": ["Relevant stat 1", "Relevant stat 2", "Relevant stat 3"]
-}
-
-Include 3-4 pain points. Make it resonate with their specific situation.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}
-
-/**
- * Personalize Why AI slide
- */
-async function personalizeWhyAI(anthropic, payload) {
-  const { clientData, companyIntelligence } = payload;
-
-  const prompt = `Generate personalized "Why AI?" content for ${clientData.name}.
-
-Client Information:
-- Company: ${clientData.name}
-- Industry: ${companyIntelligence?.industry || 'Unknown'}
-- Business Model: ${companyIntelligence?.businessModel || 'N/A'}
-- Strategic Goals: ${companyIntelligence?.strategicGoals?.join(', ') || 'N/A'}
-
-Generate AI rationale in JSON format:
-
-{
-  "mainReason": "Primary reason why AI is transformative for their industry (2-3 sentences)",
-  "benefits": [
-    {
-      "title": "Benefit name",
-      "description": "How this benefit applies to them specifically",
-      "example": "Concrete example in their industry"
-    }
-  ],
-  "competitiveImperative": "Why AI adoption is a competitive necessity (2-3 sentences)",
-  "roiPreview": "Expected ROI and business impact (2-3 sentences)"
-}
-
-Include 4-5 most compelling benefits for their situation.
-Return ONLY the JSON object.`;
-
-  const message = await anthropic.messages.create({
-    model: MODEL,
-    max_tokens: 2000,
-    temperature: 0.7,
-    messages: [{ role: 'user', content: prompt }],
-  });
-
-  const content = message.content.find((block) => block.type === 'text');
-  if (!content || content.type !== 'text') {
-    throw new Error('No text content in Claude response');
-  }
-
-  return {
-    statusCode: 200,
-    headers,
-    body: JSON.stringify(JSON.parse(content.text)),
-  };
-}

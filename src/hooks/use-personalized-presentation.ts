@@ -7,9 +7,9 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase-client';
-import { personalizeEntirePresentation } from '@/lib/presentation-personalizer-v2';
+import { personalizeEntirePresentation } from '@/lib/presentation-personalizer-secure';
 import type { Client } from '@/lib/types';
-import type { PersonalizedPresentation } from '@/lib/presentation-personalizer-v2';
+import type { PersonalizedPresentation } from '@/lib/presentation-personalizer-secure';
 
 interface UsePersonalizedPresentationResult {
   client: Client | null;

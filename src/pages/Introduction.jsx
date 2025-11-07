@@ -218,6 +218,51 @@ export default function Introduction() {
               <StatCard key={index} {...stat} delay={index * 0.1} />
             ))}
           </div>
+
+          {/* Technology Stack Section (NEW) */}
+          {activeClient?.technologies_detected?.length > 0 && (
+            <ScrollReveal animation="slideUp" delay={0.2}>
+              <div className="mb-12 p-6 bg-white/5 rounded-xl border border-white/10">
+                <h4 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#FFD700]" />
+                  Your Current Technology Stack
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {activeClient.technologies_detected.slice(0, 8).map((tech, i) => (
+                    <span
+                      key={i}
+                      className="px-3 py-1.5 bg-[#9B30FF]/20 border border-[#9B30FF]/30 rounded-lg text-sm text-white hover:bg-[#9B30FF]/30 transition-colors"
+                    >
+                      {tech}
+                    </span>
+                  ))}
+                  {activeClient.cms && (
+                    <span className="px-3 py-1.5 bg-[#FF6A00]/30 border border-[#FF6A00]/40 rounded-lg text-sm text-white font-semibold">
+                      CMS: {activeClient.cms}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm text-white/50 mt-3">
+                  We've identified your tech stack to ensure seamless integration with our AI solutions
+                </p>
+              </div>
+            </ScrollReveal>
+          )}
+
+          {/* Target Market Section (NEW) */}
+          {activeClient?.target_market && (
+            <ScrollReveal animation="slideUp" delay={0.3}>
+              <div className="mb-12 p-6 bg-gradient-to-br from-[#FF6A00]/10 to-[#9B30FF]/10 rounded-xl border border-white/10">
+                <h4 className="text-lg font-semibold text-white mb-3 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-[#FF6A00]" />
+                  Your Target Market
+                </h4>
+                <p className="text-white/80 leading-relaxed">
+                  {activeClient.target_market}
+                </p>
+              </div>
+            </ScrollReveal>
+          )}
         </div>
       </section>
 
